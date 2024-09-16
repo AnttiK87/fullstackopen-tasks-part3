@@ -1,0 +1,31 @@
+{
+  "name": "osa3",
+  "version": "1.0.0",
+  "description": "Full stack open part 3 tasks",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnttiK87/fullstackopen-tasks-part3.git"
+  },
+  "keywords": [
+    "Fullstackopen"
+  ],
+  "author": "Antti Kortelainen",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/AnttiK87/fullstackopen-tasks-part3/issues"
+  },
+  "homepage": "https://github.com/AnttiK87/fullstackopen-tasks-part3#readme",
+  "dependencies": {
+    "express": "^4.21.0",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
