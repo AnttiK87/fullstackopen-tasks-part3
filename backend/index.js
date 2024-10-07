@@ -1,7 +1,39 @@
 const express = require('express')
+const app = express()
+
+//Phonebook content. Changes doesn't affect to this. So its content is returned when server restarts
+let persons = [
+  { 
+    "id": 1,
+    "name": "Arto Hellas", 
+    "number": "040-123456"
+  },
+  { 
+    "id": 2,
+    "name": "Ada Lovelace", 
+    "number": "39-44-5323523"
+  },
+  { 
+    "id": 3,
+    "name": "Dan Abramov", 
+    "number": "12-43-234345"
+  },
+  { 
+    "id": 4,
+    "name": "Mary Poppendieck", 
+    "number": "39-23-6423122"
+  }
+]
+
+app.use(express.static('dist'))
+
 const morgan = require('morgan')
 
-const app = express()
+const cors = require('cors')
+
+app.use(cors())
+
+app.use(express.json())
 
 // Define custom Morgan token for showing reguest body
 morgan.token('body', function getBody (req) {
@@ -17,33 +49,9 @@ app.use((req, res, next) => {
     }
 })
 
-//Phonebook content. Changes doesn't affect to this. So its content is returned when server restarts
-let persons = 
-    [
-        { 
-          "id": 1,
-          "name": "Arto Hellas", 
-          "number": "040-123456"
-        },
-        { 
-          "id": 2,
-          "name": "Ada Lovelace", 
-          "number": "39-44-5323523"
-        },
-        { 
-          "id": 3,
-          "name": "Dan Abramov", 
-          "number": "12-43-234345"
-        },
-        { 
-          "id": 4,
-          "name": "Mary Poppendieck", 
-          "number": "39-23-6423122"
-        }
-      ]
-    
-
-app.use(express.json())
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
 //Phonebook header @ http://localhost:3001/
 app.get('/', (request, response) => {
@@ -121,7 +129,9 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end()
 })
 
-const PORT = 3001
+app.use(unknownEndpoint)
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
