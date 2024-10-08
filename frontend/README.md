@@ -1,1 +1,1 @@
-Part 2 task Puhelinluettelo for fullstackopen course.
+Puhelinluettelo frontend for Part 3 of fullstackopen course.
