@@ -1,2 +1,4 @@
-DELETE  https://fullstackopen-tasks-part3.onrender.com/api/persons/
+DELETE  https://fullstackopen-tasks-part3.onrender.com/api/persons/6704e78884a0a49c1a49a8d3
+#DELETE http://localhost:3001/api/persons/
+
 #add id to the end of url

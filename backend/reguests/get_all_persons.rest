@@ -1,4 +1,4 @@
-#GET https://fullstackopen-tasks-part3.onrender.com/api/persons/
-GET http://localhost:3001/api/persons/
+GET https://fullstackopen-tasks-part3.onrender.com/api/persons/
+#GET http://localhost:3001/api/persons/
 
 #to show specific add in id to the end of url
