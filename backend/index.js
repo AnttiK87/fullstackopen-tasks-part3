@@ -1,28 +1,13 @@
 const express = require('express')
 const app = express()
+require('dotenv').config()
+const Person = require('./models/person')
 
-//Phonebook content. Changes doesn't affect to this. So its content is returned when server restarts
+const url = process.env.MONGODB_URI
+
+//Phonebook content 
 let persons = [
-  { 
-    "id": 1,
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": 2,
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": 3,
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": 4,
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
+
 ]
 
 app.use(express.static('dist'))
@@ -72,7 +57,9 @@ app.get('/info', (request, response) => {
 
 // Get all persons from the phonebook @ http://localhost:3001/api/persons
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 // Get one person from the phonebook @ http://localhost:3001/api/persons/:id
@@ -87,39 +74,22 @@ app.get('/api/persons/:id', (request, response) => {
     }
   })
 
-// This generates random number between 0-999999 for ID
-const generateId = () => {
-  const generatedId = Math.floor(Math.random() * 1000000)
-  return generatedId
-}
-
-// Add person to the phonebook @ http://localhost:3001/api/persons
-app.post('/api/persons', (request, response) => {
-  const body = request.body
-  const checkName = persons.find(person => person.name === body.name)
-  //console.log(checkName)
-
-  const person = {
-    name: body.name,
-    number: body.number,
-    id: generateId(),
-  }
-
- 
-  if (!body.name || !body.number) {  //error handling if name or number is not provided in reguest body
-    return response.status(400).json({ 
-      error: 'You are trying to add a person without a name or number to the phonebook!' 
+  app.post('/api/persons', (request, response) => {
+    const body = request.body
+  
+    if (body.name === undefined || body.number === undefined) {
+      return response.status(400).json({ error: 'content missing' })
+    }
+  
+    const person = new Person({
+      name: body.name,
+      number: body.number,
     })
-  } else if (checkName != null) { //error handling if name is already in the phonebook
-    return response.status(400).json({ 
-        error: '"The name you are trying to add is already in the phonebook!' 
+  
+    person.save().then(savedPerson => {
+      response.json(savedPerson)
     })
-  }
-
-  persons = persons.concat(person)
-
-  response.json(person)
-})
+  })
 
 // Delete person from the phonebook @ http://localhost:3001/api/persons/:id
 app.delete('/api/persons/:id', (request, response) => {
@@ -131,7 +101,7 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
