@@ -19,13 +19,18 @@ const App = () => {
   const messageAdded = `Added ${newName} to the phonebook!`
   const messageUpdated = `Persons ${newName} phonenumber updated to the phonebook!`
 
-  //function for getting persons from server
+  // Function for getting persons from server
   useEffect(() => {
-    phonebookService
-      .getAll()
-      .then(initialPersons => {
+    const fetchData = async () => {
+      try {
+        const initialPersons = await phonebookService.getAll()
         setPersons(initialPersons)
-      })
+      } catch (error) {
+        showMessage("An error occurred while fetching data. Please try again later.", "error")
+        console.error("Error fetching persons:", error)
+      }
+    }
+    fetchData()
   }, [])
 
   //function for adding person to server
@@ -34,9 +39,9 @@ const App = () => {
 
     //check is inputted name in the phonebook 
     const findDublicate = persons.find(person => person.name === newName)
-    //console.log('findDublicate gets this values', findDublicate)
+    //console.log('findDublicate gets this values', findDublicate) //for debugging
 
-    //if name is not in the phonebook add new person to server db.json file or show alert
+    //if name is not in the phonebook add new person or show error alert
     if (!findDublicate){
       const personObject = {
         name: newName,
@@ -51,13 +56,33 @@ const App = () => {
         setNewNumber('Add new number')
         showMessage(messageAdded, "success")
       })
-    }
-    else{
-      //show alert and ask if user wants to change number for person already in phonebook
+      .catch(error => {
+        if (error.response && error.response.data && error.response.data.error) {
+          //for validating errors
+          showMessage(error.response.data.error, "error")
+        } else {
+          //for other errors
+          showMessage("An unexpected error occurred", "error")
+        }
+      })
+    } else{
       if (window.confirm(`${findDublicate.name} is already added to this phonebook, replace the old number (${findDublicate.number}) with a new one (${newNumber})?`)) {
         changeNumber(findDublicate.id)
-        setNewNumber('Add new number')
-        showMessage(messageUpdated, "success")
+        .then(() => {
+          // these are run only if changeNumber function succeeds
+          setNewNumber('Add new number')
+          setNewName('Add new name')
+          showMessage(messageUpdated, "success")    
+        })
+        .catch(error => {
+          if (error.response && error.response.data && error.response.data.error) {
+            // for validating errors
+            showMessage(error.response.data.error, "error")
+          } else {
+            // Other errors
+            showMessage(errorMessage, "error")
+          }
+        })
       }
     }
   }
@@ -76,9 +101,14 @@ const App = () => {
           showMessage(messageDeleted, "success")
         })
         .catch(error => {
-          console.error("Failed to delete person", error)
-          showMessage(errorMessage, "error")
-          setPersons(persons.filter(person => person.id !== id))
+          if (error.response.status === 404) {
+            console.error("Failed to delete person", error)
+            showMessage(errorMessage, "error")
+            setPersons(persons.filter(person => person.id !== id))
+          } else {
+            //for other errors
+            showMessage("An unexpected error occurred", "error")
+          }
         })
     }
   }
@@ -112,30 +142,35 @@ const App = () => {
   //function for changing phone number for existing person
   const changeNumber = id => {
     const person = persons.find(person => person.id === id)
-    const changedNumber = { ...person, number: newNumber}
-    const errorMessage = `Something went wrong while updatin persons ${person.name} phonenumber!`
+    const changedNumber = { ...person, number: newNumber }
+    const errorMessage = `Something went wrong while updating ${person.name}'s phone number!`
 
-    phonebookService
+    // Return phonebookService.update-promise
+    return phonebookService
       .update(id, changedNumber)
-        .then(returnedPerson => {
-          setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+      .then(returnedPerson => {
+        setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
       })
       .catch(error => {
-        console.error("Failed to edit number", error)
-        showMessage(errorMessage, "error")
-        setPersons(persons.filter(person => person.id !== id))
+        throw(error)
       })
-  }
+}
 
-  //function for showing notifications to user
-  const showMessage = (message, messageType) => {
-    setNotificationMessage(message)
-    setMessageType(messageType)
-    setTimeout(() => {
-      setNotificationMessage(null)
-    }, 3000)
-  }
 
+// Function for showing notifications to user
+const showMessage = (message, messageType) => {
+  setNotificationMessage(message)
+  setMessageType(messageType)
+
+  // If message type is error display time is longer
+  const displayTime = messageType === 'error' ? 10000 : 3000 // error message 10 s, other 3 s
+
+  setTimeout(() => {
+    setNotificationMessage(null)
+  }, displayTime)
+}
+
+  //return dom for browser to render the application
   return (
     <div>
       <Header header={header1} />
