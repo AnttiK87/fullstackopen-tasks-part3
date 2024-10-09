@@ -140,8 +140,8 @@ app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(result => {
       if (!result) {
-        // if person/id is not found from db return 404 for error handling
-        return response.status(404)
+        // if person/id is not found from db throw error for error handling
+        return response.status(404).json({ error: 'Person not found' })
       }
       // else continue deleting
       response.status(204).end()
