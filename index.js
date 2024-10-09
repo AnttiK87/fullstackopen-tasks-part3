@@ -53,12 +53,27 @@ app.get('/', (request, response) => {
 //Phonebook info @ http://localhost:3001/info
 app.get('/info', (request, response) => {
     const currentDate = new Date()
-    const dateString = currentDate.toString()
-    //console.log(dateString)
+
+    // Formatting date to 'wd mon dd YYYY hh:mm:ss GMT+0200 (Eastern European Standard Time)'
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    const dayName = weekDays[currentDate.getUTCDay()]
+    const monthName = months[currentDate.getUTCMonth()]
+    const day = currentDate.getUTCDate()
+    const year = currentDate.getUTCFullYear()
+
+    const timePart = currentDate.toLocaleTimeString('en-GB', { hour12: false })
+
+    const timeZoneOffset = '+0200'
+    const timeZoneName = '(Eastern European Standard Time)'
+
+    const formattedDate = `${dayName} ${monthName} ${day} ${year} ${timePart} GMT${timeZoneOffset} ${timeZoneName}`
+
 
     response.send(`
         <p>Phonebook has info for ${persons.length} people</p>
-        <p>${dateString}</p>
+        <p>${formattedDate}</p>
         `)
 })
 
